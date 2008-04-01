@@ -1,0 +1,70 @@
+<Server port="8005" shutdown="SHUTDOWN">
+
+  <!-- Comment these entries out to disable JMX MBeans support used for the 
+       administration web application -->
+  <Listener className="org.apache.catalina.core.AprLifecycleListener" />
+  <Listener className="org.apache.catalina.mbeans.ServerLifecycleListener" />
+  <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
+  <Listener className="org.apache.catalina.storeconfig.StoreConfigLifecycleListener"/>
+
+  <!-- Global JNDI resources -->
+  <GlobalNamingResources>
+
+    <!-- Editable user database that can also be used by
+         UserDatabaseRealm to authenticate users -->
+    <Resource name="UserDatabase" auth="Container"
+              type="org.apache.catalina.UserDatabase"
+       description="User database that can be updated and saved"
+           factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
+          pathname="conf/tomcat-users.xml" />
+
+  </GlobalNamingResources>
+  
+  <!-- Define the Tomcat Stand-Alone Service -->
+  <Service name="Catalina">
+
+    <!-- Define a non-SSL HTTP/1.1 Connector on port 80 -->
+    <Connector port="8080" maxHttpHeaderSize="8192"
+               maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
+               enableLookups="false" redirectPort="8443" acceptCount="100"
+               connectionTimeout="20000" disableUploadTimeout="true" />
+
+    <!-- Define a SSL HTTP/1.1 Connector on port 8443 -->
+<!--
+    <Connector port="443" maxHttpHeaderSize="8192"
+               maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
+               enableLookups="false" disableUploadTimeout="true"
+               acceptCount="100" scheme="https" secure="true"
+               clientAuth="false" sslProtocol="TLS" />
+-->
+
+    <!-- Define an AJP 1.3 Connector on port 8009 -->
+    <Connector port="8009" 
+               enableLookups="false" redirectPort="8443" protocol="AJP/1.3" />
+
+    <!-- Define the top level container in our container hierarchy -->
+    <Engine name="Catalina" defaultHost="@HOST_NAME@">
+
+      <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+             resourceName="UserDatabase"/>
+ 
+      <Host name="@HOST_NAME@" appBase="/not-used"
+            unpackWARs="true" autoDeploy="true"
+            xmlValidation="false" xmlNamespaceAware="false">
+        <Context path="" docBase="/opt/@HOST_NAME@/website/current">
+<!--
+          <Resource name="environment" auth="Container" type="org.inversoft.vertigo.environment.Environment"
+                    factory="org.apache.naming.factory.BeanFactory" environment="staging"/>
+          <Resource name="jdbc/java_website" auth="Container" type="javax.sql.DataSource"
+                    maxActive="100" maxIdle="3" maxWait="10000"
+                    username="dev" password="dev" driverClassName="com.mysql.jdbc.Driver"
+                    url="jdbc:mysql://localhost:3306/@HOST_NAME@?autoReconnect=true"/>
+-->
+        </Context>
+      </Host>
+
+    </Engine>
+
+  </Service>
+
+</Server>
