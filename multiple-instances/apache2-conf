@@ -1,16 +1,16 @@
 NameVirtualHost *:80
 <VirtualHost *:80>
 	ServerName @HOST_NAME@
-	ServerAlias @DOMAIN_NAME@
+#	ServerAlias @DOMAIN_NAME@
 	ServerAdmin webmaster@@DOMAIN_NAME@
 	
 	# Assign specific URLs to Tomcat. In general the structure of a
 	# JkMount directive is: JkMount [URL prefix] [Worker name]
-	JkMount /* ajp13_worker
+	JkMount /* @INSTANCE_NAME@
 
-	RewriteEngine on
-	RewriteCond     %{HTTP_HOST} ^@DOMAIN_NAME@$ [NC]
-	RewriteRule     ^(.*)$ http://@HOST_NAME@$1 [L]
+#	RewriteEngine on
+#	RewriteCond     %{HTTP_HOST} ^@DOMAIN_NAME@$ [NC]
+#	RewriteRule     ^(.*)$ http://@HOST_NAME@$1 [L]
 
 	ErrorLog /var/log/apache2/error.log
 

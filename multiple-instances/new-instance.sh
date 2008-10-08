@@ -5,8 +5,8 @@ if [ "$USER" != "root" ]; then
   exit 1
 fi
 
-if [ $# != 2 ]; then
-  echo "Usage: new-instance.sh <instance-name> <domain-name>"
+if [ $# != 3 ]; then
+  echo "Usage: new-instance.sh <domain-name> <port> <jk-port>"
   exit 1
 fi
 
@@ -17,11 +17,13 @@ script_dir=$PWD
 cd -
 
 # Setup the variables
-instance_name=$1
-host_name=$2
+host_name=$1
+port=$2
+jk_port=$3
+instance_name=${host_name//\./_}
 domain_name=$($script_dir/domain-name.rb $host_name)
-instance_dir=/var/lib/tomcat5.5/instances/$1
-log_dir=/var/log/tomcat5.5/instances/$1
+instance_dir=/var/lib/tomcat5.5/instances/$instance_name
+log_dir=/var/log/tomcat5.5/instances/$instance_name
 
 # Setup the instance directory
 cd /var/lib/tomcat5.5/instances
@@ -34,12 +36,12 @@ mkdir $instance_name
 # Copy the files and token replace
 mkdir $instance_dir/conf $instance_dir/webapps $instance_dir/bin $instance_dir/temp $instance_dir/work
 if ! cp $script_dir/web.xml $instance_dir/conf; then
-  echo "Unable to create new instance $1 because $script_dir/web.xml doesn't appear to exist"
+  echo "Unable to create new instance $instance_name because $script_dir/web.xml doesn't appear to exist"
   exit 1
 fi
 
-if ! sed "s/@HOST_NAME@/$host_name/g" $script_dir/server.xml > $instance_dir/conf/server.xml; then
-  echo "Unable to create new instance $1 because $script_dir/server.xml doesn't appear to exist"
+if ! sed "s/@HOST_NAME@/$host_name/g" $script_dir/server.xml | sed "s/@INSTANCE_NAME@/$instance_name/g" | sed "s/@PORT@/$port/g" | sed "s/@JK_PORT@/$jk_port/g" > $instance_dir/conf/server.xml; then
+  echo "Unable to create new instance $instance_name because $script_dir/server.xml doesn't appear to exist"
   exit 1
 fi
 
@@ -48,8 +50,24 @@ if ! sed "s/@INSTANCE_NAME@/$instance_name/g" $script_dir/tomcat.sh > $instance_
   exit 1
 fi
 
+# Add the Mod_JK worker defition
+if ! sed "s/@INSTANCE_NAME@/$instance_name/g" $script_dir/workers.properties | sed "s/@JK_PORT@/$jk_port/g" >> /etc/libapache2-mod-jk/workers.properties; then
+  echo "Unable to create new instance $instance_name because the /etc/libapache2-mod-jk/workers.properties file couldn't be updated."
+  exit 1
+fi
+
+if ! sed "s/\(worker\.list.*\)/\1,$instance_name/g" /etc/libapache2-mod-jk/workers.properties > /tmp/workers.properties; then
+  echo "Unable to create new instance $instance_name because the worker.list property in the /etc/libapache2-mod-jk/workers.properties file couldn't be updated."
+  exit 1
+fi
+
+if ! mv /tmp/workers.properties /etc/libapache2-mod-jk/workers.properties; then
+  echo "Unable to move the modified workers.properties to /etc/libapache2-mod-jk."
+  exit 1
+fi
+
 # Setup apache configuration
-if ! sed "s/@HOST_NAME@/$host_name/g" $script_dir/apache2-conf | sed "s/@DOMAIN_NAME@/$domain_name/g" > /etc/apache2/sites-available/$host_name; then
+if ! sed "s/@HOST_NAME@/$host_name/g" $script_dir/apache2-conf | sed "s/@DOMAIN_NAME@/$domain_name/g" | sed "s/@INSTANCE_NAME@/$instance_name/g" > /etc/apache2/sites-available/$host_name; then
   echo "Unable to setup Apache2 configuration for the new Tomcat instance"
   exit 1
 fi
@@ -73,12 +91,12 @@ chmod -R g+w $log_dir
 ln -s $log_dir $instance_dir/logs
 
 # Create catalina.policy (for the security manager)
-echo "// This file is an example of a policy file. You can edit this file for the specific instance" > conf/catalina.policy.example
-echo ""  >> conf/catalina.policy.example
-cat /etc/tomcat5.5/policy.d/*.policy >> conf/catalina.policy.example
-chown tomcat55:nogroup conf/catalina.policy.example
-chmod o-rwx conf/catalina.policy.example
-chmod g+w conf/catalina.policy.example
+echo "// This file is an example of a policy file. You can edit this file for the specific instance" > $instance_dir/conf/catalina.policy.example
+echo ""  >> $instance_dir/conf/catalina.policy.example
+cat $script_dir/policy.d/*.policy >> $instance_dir/conf/catalina.policy.example
+chown tomcat55:nogroup $instance_dir/conf/catalina.policy.example
+chmod o-rwx $instance_dir/conf/catalina.policy.example
+chmod g+w $instance_dir/conf/catalina.policy.example
 
 # Setup auto start
 ln -s $instance_dir/bin/tomcat.sh /etc/init.d/tomcat5.5_$instance_name
