@@ -52,29 +52,28 @@ fi
 
 # Add the Mod_JK worker defition
 if ! sed "s/@INSTANCE_NAME@/$instance_name/g" $script_dir/workers.properties | sed "s/@JK_PORT@/$jk_port/g" >> /etc/libapache2-mod-jk/workers.properties; then
-  echo "Unable to create new instance $instance_name because the /etc/libapache2-mod-jk/workers.properties file couldn't be updated."
-  exit 1
-fi
+  echo "Unable to create new instance $instance_name because the /etc/libapache2-mod-jk/workers.properties file couldn't be updated. Assuming machine doesn't use MOD JK."
+else
+  if ! sed "s/\(worker\.list.*\)/\1,$instance_name/g" /etc/libapache2-mod-jk/workers.properties > /tmp/workers.properties; then
+    echo "Unable to create new instance $instance_name because the worker.list property in the /etc/libapache2-mod-jk/workers.properties file couldn't be updated."
+    exit 1
+  fi
 
-if ! sed "s/\(worker\.list.*\)/\1,$instance_name/g" /etc/libapache2-mod-jk/workers.properties > /tmp/workers.properties; then
-  echo "Unable to create new instance $instance_name because the worker.list property in the /etc/libapache2-mod-jk/workers.properties file couldn't be updated."
-  exit 1
-fi
+  if ! mv /tmp/workers.properties /etc/libapache2-mod-jk/workers.properties; then
+    echo "Unable to move the modified workers.properties to /etc/libapache2-mod-jk."
+    exit 1
+  fi
 
-if ! mv /tmp/workers.properties /etc/libapache2-mod-jk/workers.properties; then
-  echo "Unable to move the modified workers.properties to /etc/libapache2-mod-jk."
-  exit 1
-fi
+  # Setup apache configuration
+  if ! sed "s/@HOST_NAME@/$host_name/g" $script_dir/apache2-conf | sed "s/@DOMAIN_NAME@/$domain_name/g" | sed "s/@INSTANCE_NAME@/$instance_name/g" > /etc/apache2/sites-available/$host_name; then
+    echo "Unable to setup Apache2 configuration for the new Tomcat instance"
+    exit 1
+  fi
 
-# Setup apache configuration
-if ! sed "s/@HOST_NAME@/$host_name/g" $script_dir/apache2-conf | sed "s/@DOMAIN_NAME@/$domain_name/g" | sed "s/@INSTANCE_NAME@/$instance_name/g" > /etc/apache2/sites-available/$host_name; then
-  echo "Unable to setup Apache2 configuration for the new Tomcat instance"
-  exit 1
-fi
-
-if ! a2ensite $host_name; then
-  echo "Unable to enable Apache2 site configuration"
-  exit 1
+  if ! a2ensite $host_name; then
+    echo "Unable to enable Apache2 site configuration"
+    exit 1
+  fi
 fi
 
 # Set the permissions to protect the instance
