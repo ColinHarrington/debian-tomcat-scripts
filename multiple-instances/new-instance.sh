@@ -5,6 +5,11 @@ if [ "$USER" != "root" ]; then
   exit 1
 fi
 
+if ! ruby --version > /dev/null; then
+  echo "You must have ruby installed on the system to use this script"
+  exit 1
+fi
+
 if [ $# != 3 ]; then
   echo "Usage: new-instance.sh <domain-name> <port> <jk-port>"
   exit 1
