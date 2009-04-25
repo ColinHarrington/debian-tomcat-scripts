@@ -107,3 +107,4 @@ update-rc.d tomcat5.5_${host_name} defaults 90
 
 # Create the web directory
 mkdir -p /opt/${host_name}/website
+chown -R tomcat55:nogroup /opt/${host_name}
