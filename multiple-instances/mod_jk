@@ -1,0 +1,13 @@
+# The location where mod_jk will find the workers definitions
+JkWorkersFile   /etc/libapache2-mod-jk/workers.properties
+
+# The location where mod_jk is going to place its log file
+JkLogFile       /var/log/apache2/mod_jk.log
+
+# The log level:
+# - info log will contain standard mod_jk activity (default).
+# - warn log will contain non fatal error reports.
+# - error log will contain also error reports.
+# - debug log will contain all information on mod_jk activity
+# - trace log will contain all tracing information on mod_jk activity
+JkLogLevel      error

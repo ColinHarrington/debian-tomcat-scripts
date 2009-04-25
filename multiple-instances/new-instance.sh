@@ -49,7 +49,7 @@ if ! sed "s/@HOST_NAME@/${host_name}/g" ${script_dir}/server.xml | sed "s/@HOST_
   exit 1
 fi
 
-if ! sed "s/@HOST_NAME_UNDERSCORES@/${host_name_underscores}/g" ${script_dir}/tomcat.sh > ${instance_dir}/bin/tomcat.sh; then
+if ! sed "s/@HOST_NAME@/${host_name}/g" ${script_dir}/tomcat.sh > ${instance_dir}/bin/tomcat.sh; then
   echo "Unable to find the custom tomcat.sh file in ${script_dir}. This file must exist."
   exit 1
 fi
@@ -77,6 +77,12 @@ else
   if ! a2ensite ${host_name}; then
     echo "Unable to enable Apache2 site configuration"
     exit 1
+  fi
+
+  if [ ! -f /etc/apache2/conf.d/mod_jk ]; then
+    if ! cp ${script_dir}/mod_jk /etc/apache2/conf.d; then
+      echo "Unable to copy mod_jk configuration to /etc/apache/conf.d. You will have to do this manually."
+    fi
   fi
 fi
 
