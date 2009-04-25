@@ -6,7 +6,7 @@ NameVirtualHost *:80
 	
 	# Assign specific URLs to Tomcat. In general the structure of a
 	# JkMount directive is: JkMount [URL prefix] [Worker name]
-	JkMount /* @INSTANCE_NAME@
+	JkMount /* @HOST_NAME_UNDERSCORES@
 
 #	RewriteEngine on
 #	RewriteCond     %{HTTP_HOST} ^@DOMAIN_NAME@$ [NC]

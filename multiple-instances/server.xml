@@ -63,7 +63,7 @@
                     timeBetweenEvictionRunsMillis="30000" minEvictableIdleTimeMillis="60000"
                     poolPreparedStatements="true" maxOpenPreparedStatements="30"
                     username="dev" password="dev" driverClassName="com.mysql.jdbc.Driver"
-                    url="jdbc:mysql://localhost:3306/@INSTANCE_NAME@?relaxAutoCommit=true&amp;characterEncoding=utf8"/>
+                    url="jdbc:mysql://localhost:3306/@HOST_NAME_UNDERSCORES@?relaxAutoCommit=true&amp;characterEncoding=utf8"/>
 -->
         </Context>
       </Host>

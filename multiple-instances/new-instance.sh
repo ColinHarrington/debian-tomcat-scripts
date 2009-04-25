@@ -25,42 +25,41 @@ cd -
 host_name=$1
 port=$2
 jk_port=$3
-instance_name=${host_name//\./_}
+host_name_underscores=${host_name//\./_}
 domain_name=$($script_dir/domain-name.rb $host_name)
-instance_dir=/var/lib/tomcat5.5/instances/$instance_name
-log_dir=/var/log/tomcat5.5/instances/$instance_name
+instance_dir=/var/lib/tomcat5.5/instances/${host_name}
+log_dir=/var/log/tomcat5.5/instances/${host_name}
 
 # Setup the instance directory
-cd /var/lib/tomcat5.5/instances
-if [ -d $instance_name ]; then
-  echo "Instance $instance_name already created."
+if [ -d $instance_dir ]; then
+  echo "Instance $hose_name already created."
   exit 1
 fi
-mkdir $instance_name
+mkdir -p $instance_dir
 
 # Copy the files and token replace
 mkdir $instance_dir/conf $instance_dir/webapps $instance_dir/bin $instance_dir/temp $instance_dir/work
 if ! cp $script_dir/web.xml $instance_dir/conf; then
-  echo "Unable to create new instance $instance_name because $script_dir/web.xml doesn't appear to exist"
+  echo "Unable to create new instance $host_name because $script_dir/web.xml doesn't appear to exist"
   exit 1
 fi
 
-if ! sed "s/@HOST_NAME@/$host_name/g" $script_dir/server.xml | sed "s/@INSTANCE_NAME@/$instance_name/g" | sed "s/@PORT@/$port/g" | sed "s/@JK_PORT@/$jk_port/g" > $instance_dir/conf/server.xml; then
-  echo "Unable to create new instance $instance_name because $script_dir/server.xml doesn't appear to exist"
+if ! sed "s/@HOST_NAME@/$host_name/g" $script_dir/server.xml | sed "s/@HOST_NAME_UNDERSCORES@/${host_name_underscores}/g" | sed "s/@PORT@/$port/g" | sed "s/@JK_PORT@/$jk_port/g" > $instance_dir/conf/server.xml; then
+  echo "Unable to create new instance $host_name because $script_dir/server.xml doesn't appear to exist"
   exit 1
 fi
 
-if ! sed "s/@INSTANCE_NAME@/$instance_name/g" $script_dir/tomcat.sh > $instance_dir/bin/tomcat.sh; then
+if ! sed "s/@HOST_NAME_UNDERSCORES@/${host_name_underscores}/g" $script_dir/tomcat.sh > $instance_dir/bin/tomcat.sh; then
   echo "Unable to find the custom tomcat.sh file in $script_dir. This file must exist."
   exit 1
 fi
 
 # Add the Mod_JK worker defition
-if ! sed "s/@INSTANCE_NAME@/$instance_name/g" $script_dir/workers.properties | sed "s/@JK_PORT@/$jk_port/g" >> /etc/libapache2-mod-jk/workers.properties; then
-  echo "Unable to create new instance $instance_name because the /etc/libapache2-mod-jk/workers.properties file couldn't be updated. Assuming machine doesn't use MOD JK."
+if ! sed "s/@HOST_NAME@/${host_name}/g" $script_dir/workers.properties | sed "s/@JK_PORT@/$jk_port/g" >> /etc/libapache2-mod-jk/workers.properties; then
+  echo "Unable to create new instance ${host_name} because the /etc/libapache2-mod-jk/workers.properties file couldn't be updated. Assuming machine doesn't use MOD JK."
 else
-  if ! sed "s/\(worker\.list.*\)/\1,$instance_name/g" /etc/libapache2-mod-jk/workers.properties > /tmp/workers.properties; then
-    echo "Unable to create new instance $instance_name because the worker.list property in the /etc/libapache2-mod-jk/workers.properties file couldn't be updated."
+  if ! sed "s/\(worker\.list.*\)/\1,${host_name}/g" /etc/libapache2-mod-jk/workers.properties > /tmp/workers.properties; then
+    echo "Unable to create new instance ${host_name} because the worker.list property in the /etc/libapache2-mod-jk/workers.properties file couldn't be updated."
     exit 1
   fi
 
@@ -70,7 +69,7 @@ else
   fi
 
   # Setup apache configuration
-  if ! sed "s/@HOST_NAME@/$host_name/g" $script_dir/apache2-conf | sed "s/@DOMAIN_NAME@/$domain_name/g" | sed "s/@INSTANCE_NAME@/$instance_name/g" > /etc/apache2/sites-available/$host_name; then
+  if ! sed "s/@HOST_NAME@/$host_name/g" $script_dir/apache2-conf | sed "s/@DOMAIN_NAME@/$domain_name/g" | sed "s/@HOST_NAME_UNDERSCORES@/${host_name_underscores}/g" > /etc/apache2/sites-available/$host_name; then
     echo "Unable to setup Apache2 configuration for the new Tomcat instance"
     exit 1
   fi
@@ -103,5 +102,8 @@ chmod o-rwx $instance_dir/conf/catalina.policy.example
 chmod g+w $instance_dir/conf/catalina.policy.example
 
 # Setup auto start
-ln -s $instance_dir/bin/tomcat.sh /etc/init.d/tomcat5.5_$instance_name
-update-rc.d tomcat5.5_$instance_name defaults 90
+cp $instance_dir/bin/tomcat.sh /etc/init.d/tomcat5.5_${host_name}
+update-rc.d tomcat5.5_${host_name} defaults 90
+
+# Create the web directory
+mkdir -p /opt/${host_name}/website
