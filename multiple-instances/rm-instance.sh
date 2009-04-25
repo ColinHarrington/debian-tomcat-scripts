@@ -12,18 +12,14 @@ fi
 
 # Get the working dir
 script_dir=$(dirname $0)
-cd $script_dir
+cd ${script_dir}
 script_dir=$PWD
 cd - > /dev/null
 
 # Setup the variables
 host_name=$1
-port=$2
-jk_port=$3
-instance_name=${host_name//\./_}
-domain_name=$($script_dir/domain-name.rb $host_name)
-instance_dir=/var/lib/tomcat5.5/instances/$instance_name
-log_dir=/var/log/tomcat5.5/instances/$instance_name
+instance_dir=/var/lib/tomcat5.5/instances/${host_name}
+log_dir=/var/log/tomcat5.5/instances/${host_name}
 
 if [ ! -d $instance_dir ]; then
   echo "Invalid instance $host_name ($instance_dir is missing)"
@@ -47,5 +43,5 @@ fi
 rm -r $log_dir
 
 # Setup auto start
-rm /etc/init.d/tomcat5.5_$instance_name
-update-rc.d tomcat5.5_$instance_name remove
+rm /etc/init.d/tomcat5.5_${host_name}
+update-rc.d tomcat5.5_${host_name} remove
