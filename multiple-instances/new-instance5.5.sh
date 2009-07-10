@@ -5,11 +5,6 @@ if [ "$USER" != "root" ]; then
   exit 1
 fi
 
-if ! ruby --version > /dev/null; then
-  echo "You must have ruby installed on the system to use this script"
-  exit 1
-fi
-
 if [ $# != 3 ]; then
   echo "Usage: new-instance.sh <domain-name> <port> <jk-port>"
   exit 1
@@ -31,7 +26,7 @@ log_dir=/var/log/tomcat5.5/instances/${host_name}
 
 # Setup the instance directory
 if [ -d ${instance_dir} ]; then
-  echo "Instance $hose_name already created."
+  echo "Instance $host_name already created."
   exit 1
 fi
 mkdir -p ${instance_dir}
@@ -48,8 +43,8 @@ if ! sed "s/@HOST_NAME@/${host_name}/g" ${script_dir}/tomcat5.5/server.xml | sed
   exit 1
 fi
 
-if ! sed "s/@HOST_NAME@/${host_name}/g" ${script_dir}/tomcat5.5/init-tomcat.sh > ${instance_dir}/bin/init-tomcat.sh; then
-  echo "Unable to find the custom tomcat5.5/init-tomcat.sh file in ${script_dir}. This file must exist."
+if ! sed "s/@HOST_NAME@/${host_name}/g" ${script_dir}/init.d/tomcat5.5 > ${instance_dir}/bin/tomcat5.5-init-script; then
+  echo "Unable to find the custom ${script_dir}/init.d/tomcat5.5 file. This file must exist."
   exit 1
 fi
 
@@ -107,7 +102,7 @@ chmod o-rwx ${instance_dir}/conf/catalina.policy.example
 chmod g+w ${instance_dir}/conf/catalina.policy.example
 
 # Setup auto start
-cp ${instance_dir}/bin/init-tomcat.sh /etc/init.d/tomcat5.5_${host_name}
+cp ${instance_dir}/bin/tomcat5.5-init-script /etc/init.d/tomcat5.5_${host_name}
 update-rc.d tomcat5.5_${host_name} defaults 90
 
 # Create the web directory
