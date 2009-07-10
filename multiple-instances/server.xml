@@ -57,11 +57,7 @@
           <Resource name="environment" auth="Container" type="org.jcatapult.environment.Environment"
                     factory="org.apache.naming.factory.BeanFactory" environment="production"/>
           <Resource name="jdbc/@HOST_NAME@" auth="Container" type="javax.sql.DataSource"
-                    initialSize="2" maxActive="15" maxIdle="5" maxWait="10000"
-                    removeAbandoned="true" removeAbandonedTimeout="180"
-                    validationQuery="select 1" testOnBorrow="true" testWhileIdle="true"
-                    timeBetweenEvictionRunsMillis="30000" minEvictableIdleTimeMillis="60000"
-                    poolPreparedStatements="true" maxOpenPreparedStatements="30"
+                    maxActive="20" validationQuery="select 1" 
                     username="dev" password="dev" driverClassName="com.mysql.jdbc.Driver"
                     url="jdbc:mysql://localhost:3306/@HOST_NAME_UNDERSCORES@?relaxAutoCommit=true&amp;characterEncoding=utf8"/>
 -->
