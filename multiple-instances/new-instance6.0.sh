@@ -63,7 +63,7 @@ else
   fi
 
   # Setup apache configuration
-  if ! sed "s/@HOST_NAME@/${host_name}/g" ${script_dir}/apache2/site-conf > /etc/apache2/sites-available/${host_name}; then
+  if ! sed "s/@HOST_NAME@/${host_name}/g" ${script_dir}/apache2/site > /etc/apache2/sites-available/${host_name}; then
     echo "Unable to setup Apache2 configuration for the new Tomcat instance"
     exit 1
   fi
