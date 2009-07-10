@@ -83,7 +83,7 @@ fi
 # Set the permissions to protect the instance
 chown -R tomcat6:nogroup ${instance_dir}
 chmod -R o-rwx ${instance_dir}
-chmod ug+rx ${instance_dir}/bin/init-tomcat.sh
+chmod ug+rx ${instance_dir}/bin/tomcat6-init-script
 
 # Setup the logs
 mkdir ${log_dir}

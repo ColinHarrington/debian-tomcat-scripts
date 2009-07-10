@@ -53,7 +53,7 @@
       <Host name="@HOST_NAME@" appBase="/not-used"
             unpackWARs="true" autoDeploy="true"
             xmlValidation="false" xmlNamespaceAware="false">
-        <Context path="" docBase="/opt/@HOST_NAME@/website/current">
+        <Context path="" docBase="/var/tomcat5.5/@HOST_NAME@/website/current">
 <!--
           <Resource name="environment" auth="Container" type="org.jcatapult.environment.Environment"
                     factory="org.apache.naming.factory.BeanFactory" environment="production"/>

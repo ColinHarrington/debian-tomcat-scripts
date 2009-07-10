@@ -63,7 +63,7 @@ else
   fi
 
   # Setup apache configuration
-  if ! sed "s/@HOST_NAME@/${host_name}/g" ${script_dir}/apache2/site-conf > /etc/apache2/sites-available/${host_name}; then
+  if ! sed "s/@HOST_NAME@/${host_name}/g" ${script_dir}/apache2/site > /etc/apache2/sites-available/${host_name}; then
     echo "Unable to setup Apache2 configuration for the new Tomcat instance"
     exit 1
   fi
@@ -83,14 +83,12 @@ fi
 # Set the permissions to protect the instance
 chown -R tomcat55:nogroup ${instance_dir}
 chmod -R o-rwx ${instance_dir}
-chmod -R g+w ${instance_dir}
-chmod ug+rx ${instance_dir}/bin/init-tomcat.sh
+chmod ug+rx ${instance_dir}/bin/tomcat5.5-init-script
 
 # Setup the logs
 mkdir ${log_dir}
 chown -R tomcat55:nogroup ${log_dir}
 chmod -R o-rwx ${log_dir}
-chmod -R g+w ${log_dir}
 ln -s ${log_dir} ${instance_dir}/logs
 
 # Create catalina.policy (for the security manager)
@@ -99,7 +97,6 @@ echo ""  >> ${instance_dir}/conf/catalina.policy.example
 cat ${script_dir}/tomcat5.5/policy.d/*.policy >> ${instance_dir}/conf/catalina.policy.example
 chown tomcat55:nogroup ${instance_dir}/conf/catalina.policy.example
 chmod o-rwx ${instance_dir}/conf/catalina.policy.example
-chmod g+w ${instance_dir}/conf/catalina.policy.example
 
 # Setup auto start
 cp ${instance_dir}/bin/tomcat5.5-init-script /etc/init.d/tomcat5.5_${host_name}

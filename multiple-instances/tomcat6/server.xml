@@ -45,7 +45,7 @@
       <Host name="localhost"  appBase="webapps"
             unpackWARs="true" autoDeploy="true"
             xmlValidation="false" xmlNamespaceAware="false">
-        <Context path="" docBase="/opt/@HOST_NAME@/website/current">
+        <Context path="" docBase="/var/tomcat6/@HOST_NAME@/website/current">
 <!--
           <Resource name="environment" auth="Container" type="org.jcatapult.environment.Environment"
                     factory="org.apache.naming.factory.BeanFactory" environment="production"/>
