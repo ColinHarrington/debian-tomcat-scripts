@@ -45,7 +45,6 @@
       <Host name="localhost"  appBase="webapps"
             unpackWARs="true" autoDeploy="true"
             xmlValidation="false" xmlNamespaceAware="false">
-        <Context path="" docBase="/var/tomcat6/@HOST_NAME@/website/current">
 <!--
           <Resource name="environment" auth="Container" type="org.jcatapult.environment.Environment"
                     factory="org.apache.naming.factory.BeanFactory" environment="production"/>
@@ -54,7 +53,6 @@
                     username="dev" password="dev" driverClassName="com.mysql.jdbc.Driver"
                     url="jdbc:mysql://localhost:3306/@HOST_NAME_UNDERSCORES@?relaxAutoCommit=true&amp;characterEncoding=utf8"/>
 -->
-        </Context>
       </Host>
     </Engine>
   </Service>
